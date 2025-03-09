@@ -1,13 +1,14 @@
 "use client";
 
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { addDoc, collection } from "firebase/firestore";
 
 import useRentModal from "@/app/hooks/useRentModal";
+import { db } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
 
 import Modal from "./Modal";
 import Counter from "../inputs/Counter";
@@ -86,28 +87,33 @@ const RentModal = () => {
     setStep((value) => value + 1);
   };
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     if (step !== STEPS.PRICE) {
       return onNext();
     }
 
     setIsLoading(true);
 
-    axios
-      .post("/api/listings", data)
-      .then(() => {
-        toast.success("Listing created!");
-        router.refresh();
-        reset();
-        setStep(STEPS.CATEGORY);
-        rentModal.onClose();
-      })
-      .catch(() => {
-        toast.error("Something went wrong.");
-      })
-      .finally(() => {
-        setIsLoading(false);
+    try {
+      // Save the listing to Firestore
+      const listingsRef = collection(db, "listings");
+      await addDoc(listingsRef, {
+        ...data,
+        createdAt: new Date().toISOString(),
       });
+
+      // Success
+      toast.success("Listing created!");
+      router.refresh();
+      reset();
+      setStep(STEPS.CATEGORY);
+      rentModal.onClose();
+    } catch (error) {
+      // Handle errors
+      toast.error("Something went wrong.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const actionLabel = useMemo(() => {
@@ -177,7 +183,7 @@ const RentModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="Share some basics about your place"
-          subtitle="What amenitis do you have?"
+          subtitle="What amenities do you have?"
         />
         <Counter
           onChange={(value) => setCustomValue("guestCount", value)}

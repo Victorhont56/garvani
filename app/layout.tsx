@@ -9,8 +9,8 @@ import getCurrentUser from "./actions/getCurrentUser";
 import RentModal from "./components/modals/RentModal";
 
 export const metadata = {
-  title: "Airbnb",
-  description: "Airbnb Clone",
+  title: "Garvani",
+  description: "Welcome to Garvani",
 };
 
 const font = Nunito({

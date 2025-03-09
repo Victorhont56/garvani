@@ -1,4 +1,5 @@
-import prisma from "@/app/libs/prismadb";
+import { db } from "@/app/libs/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 interface IParams {
   listingId?: string;
@@ -7,31 +8,42 @@ interface IParams {
 export default async function getListingById(params: IParams) {
   try {
     const { listingId } = params;
+    if (!listingId) return null;
 
-    const listing = await prisma.listing.findUnique({
-      where: {
-        id: listingId,
-      },
-      include: {
-        user: true,
-      },
-    });
+    // Reference to listing document
+    const listingRef = doc(db, "listings", listingId);
+    const listingSnap = await getDoc(listingRef);
 
-    if (!listing) {
+    if (!listingSnap.exists()) {
       return null;
+    }
+
+    const listing = listingSnap.data();
+
+    // Reference to user document if user details are needed
+    let user = null;
+    if (listing.userId) {
+      const userRef = doc(db, "users", listing.userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        user = {
+          ...userData,
+          createdAt: userData.createdAt?.toDate().toISOString() || null,
+          updatedAt: userData.updatedAt?.toDate().toISOString() || null,
+          emailVerified: userData.emailVerified?.toDate().toISOString() || null,
+        };
+      }
     }
 
     return {
       ...listing,
-      createdAt: listing.createdAt.toString(),
-      user: {
-        ...listing.user,
-        createdAt: listing.user.createdAt.toString(),
-        updatedAt: listing.user.updatedAt.toString(),
-        emailVerified: listing.user.emailVerified?.toString() || null,
-      },
+      id: listingId,
+      createdAt: listing.createdAt?.toDate().toISOString() || null,
+      user, // Include user details if available
     };
   } catch (error: any) {
-    throw new Error(error);
+    console.error("Error fetching listing by ID:", error);
+    throw new Error("Failed to fetch listing.");
   }
 }

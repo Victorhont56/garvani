@@ -1,11 +1,12 @@
 "use client";
 
 import { toast } from "react-hot-toast";
-import axios from "axios";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { doc, deleteDoc } from "firebase/firestore";
 
 import { SafeListing, SafeUser } from "@/app/types";
+import { db } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
 
 import Heading from "@/app/components/Heading";
 import Container from "@/app/components/Container";
@@ -24,21 +25,20 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
   const [deletingId, setDeletingId] = useState("");
 
   const onDelete = useCallback(
-    (id: string) => {
+    async (id: string) => {
       setDeletingId(id);
 
-      axios
-        .delete(`/api/listings/${id}`)
-        .then(() => {
-          toast.success("Listing deleted");
-          router.refresh();
-        })
-        .catch((error) => {
-          toast.error(error?.response?.data?.error);
-        })
-        .finally(() => {
-          setDeletingId("");
-        });
+      try {
+        // Delete the listing from Firestore
+        await deleteDoc(doc(db, "listings", id));
+
+        toast.success("Listing deleted");
+        router.refresh();
+      } catch (error) {
+        toast.error("Something went wrong.");
+      } finally {
+        setDeletingId("");
+      }
     },
     [router]
   );

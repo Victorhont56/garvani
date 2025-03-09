@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-
 import getCurrentUser from "@/app/actions/getCurrentUser";
-import prisma from "@/app/libs/prismadb";
+import { db } from "@/app/libs/firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 interface IParams {
   listingId?: string;
@@ -20,20 +20,23 @@ export async function POST(request: Request, { params }: { params: IParams }) {
     throw new Error("Invalid ID");
   }
 
-  let favoriteIds = [...(currentUser.favoriteIds || [])];
+  const userRef = doc(db, "users", currentUser.email); // Firestore uses email as the doc ID
+  const userSnap = await getDoc(userRef);
 
-  favoriteIds.push(listingId);
+  if (!userSnap.exists()) {
+    throw new Error("User not found");
+  }
 
-  const user = await prisma.user.update({
-    where: {
-      id: currentUser.id,
-    },
-    data: {
-      favoriteIds,
-    },
-  });
+  const userData = userSnap.data();
+  let favoriteIds = Array.isArray(userData.favoriteIds) ? userData.favoriteIds : [];
 
-  return NextResponse.json(user);
+  if (!favoriteIds.includes(listingId)) {
+    favoriteIds.push(listingId);
+  }
+
+  await updateDoc(userRef, { favoriteIds });
+
+  return NextResponse.json({ success: true, favoriteIds });
 }
 
 export async function DELETE(
@@ -52,18 +55,19 @@ export async function DELETE(
     throw new Error("Invalid ID");
   }
 
-  let favoriteIds = [...(currentUser.favoriteIds || [])];
+  const userRef = doc(db, "users", currentUser.email);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    throw new Error("User not found");
+  }
+
+  const userData = userSnap.data();
+  let favoriteIds = Array.isArray(userData.favoriteIds) ? userData.favoriteIds : [];
 
   favoriteIds = favoriteIds.filter((id) => id !== listingId);
 
-  const user = await prisma.user.update({
-    where: {
-      id: currentUser.id,
-    },
-    data: {
-      favoriteIds,
-    },
-  });
+  await updateDoc(userRef, { favoriteIds });
 
-  return NextResponse.json(user);
+  return NextResponse.json({ success: true, favoriteIds });
 }

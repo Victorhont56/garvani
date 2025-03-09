@@ -8,24 +8,25 @@ import UserMenu from "./UserMenu";
 import { SafeUser } from "@/app/types";
 
 interface NavbarProps {
-  currentUser?: SafeUser | null;
+  currentUser?: SafeUser | null; // Allow undefined explicitly
 }
 
-const Navbar: React.FC<NavbarProps> = ({ currentUser }) => {
+const Navbar: React.FC<NavbarProps> = ({ currentUser = null }) => { // Default to null
   return (
     <div className="fixed w-full bg-white z-10 shadow-sm">
       <div className="py-4 border-b-[1px]">
         <Container>
-          <div className="flex flex-row items-center justify-between gap3 md:gap-0">
+          <div className="flex flex-row items-center justify-between gap-3 md:gap-0">
             <Logo />
             <Search />
+            {/* Pass currentUser safely */}
             <UserMenu currentUser={currentUser} />
           </div>
         </Container>
       </div>
-
       <Categories />
     </div>
   );
 };
+
 export default Navbar;

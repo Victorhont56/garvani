@@ -1,14 +1,15 @@
 "use client";
 
-import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import { Range } from "react-date-range";
 import { useRouter } from "next/navigation";
 import { differenceInDays, eachDayOfInterval } from "date-fns";
+import { addDoc, collection } from "firebase/firestore";
 
 import useLoginModal from "@/app/hooks/useLoginModal";
 import { SafeListing, SafeReservation, SafeUser } from "@/app/types";
+import { db } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
 
 import Container from "@/app/components/Container";
 import { categories } from "@/app/components/navbar/Categories";
@@ -61,31 +62,34 @@ const ListingClient: React.FC<ListingClientProps> = ({
   const [totalPrice, setTotalPrice] = useState(listing.price);
   const [dateRange, setDateRange] = useState<Range>(initialDateRange);
 
-  const onCreateReservation = useCallback(() => {
+  const onCreateReservation = useCallback(async () => {
     if (!currentUser) {
       return loginModal.onOpen();
     }
+
     setIsLoading(true);
 
-    axios
-      .post("/api/reservations", {
+    try {
+      // Create a new reservation in Firestore
+      const reservationsRef = collection(db, "reservations");
+      await addDoc(reservationsRef, {
         totalPrice,
         startDate: dateRange.startDate,
         endDate: dateRange.endDate,
-        listingId: listing?.id,
-      })
-      .then(() => {
-        toast.success("Listing reserved!");
-        setDateRange(initialDateRange);
-        router.push("/trips");
-      })
-      .catch(() => {
-        toast.error("Something went wrong.");
-      })
-      .finally(() => {
-        setIsLoading(false);
+        listingId: listing.id,
+        userId: currentUser.id,
+        createdAt: new Date().toISOString(),
       });
-  }, [totalPrice, dateRange, listing?.id, router, currentUser, loginModal]);
+
+      toast.success("Listing reserved!");
+      setDateRange(initialDateRange);
+      router.push("/trips");
+    } catch (error) {
+      toast.error("Something went wrong.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [totalPrice, dateRange, listing.id, currentUser, loginModal, router]);
 
   useEffect(() => {
     if (dateRange.startDate && dateRange.endDate) {

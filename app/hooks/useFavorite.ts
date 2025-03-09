@@ -1,10 +1,10 @@
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
+import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 import { SafeUser } from "@/app/types";
-
+import { db } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
 import useLoginModal from "./useLoginModal";
 
 interface IUseFavorite {
@@ -18,7 +18,6 @@ const useFavorite = ({ listingId, currentUser }: IUseFavorite) => {
 
   const hasFavorited = useMemo(() => {
     const list = currentUser?.favoriteIds || [];
-
     return list.includes(listingId);
   }, [currentUser, listingId]);
 
@@ -31,15 +30,20 @@ const useFavorite = ({ listingId, currentUser }: IUseFavorite) => {
       }
 
       try {
-        let request;
+        const userRef = doc(db, "users", currentUser.id);
 
         if (hasFavorited) {
-          request = () => axios.delete(`/api/favorites/${listingId}`);
+          // Remove the listing from favorites
+          await updateDoc(userRef, {
+            favoriteIds: arrayRemove(listingId),
+          });
         } else {
-          request = () => axios.post(`/api/favorites/${listingId}`);
+          // Add the listing to favorites
+          await updateDoc(userRef, {
+            favoriteIds: arrayUnion(listingId),
+          });
         }
 
-        await request();
         router.refresh();
         toast.success("Success");
       } catch (error) {

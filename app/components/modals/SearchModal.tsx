@@ -1,19 +1,21 @@
 "use client";
 
-import qs from "query-string";
-import dynamic from "next/dynamic";
 import { useCallback, useMemo, useState } from "react";
 import { Range } from "react-date-range";
 import { formatISO } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 import useSearchModal from "@/app/hooks/useSearchModal";
+import { db } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
 
 import Modal from "./Modal";
 import Calendar from "../inputs/Calendar";
 import Counter from "../inputs/Counter";
 import CountrySelect, { CountrySelectValue } from "../inputs/CountrySelect";
 import Heading from "../Heading";
+import dynamic from "next/dynamic";
+import qs from "query-string";
 
 enum STEPS {
   LOCATION = 0,
@@ -59,6 +61,32 @@ const SearchModal = () => {
       return onNext();
     }
 
+    // Build the query for Firestore
+    const listingsRef = collection(db, "listings");
+    let firestoreQuery = query(listingsRef);
+
+    // Filter by location
+    if (location?.values) {
+      firestoreQuery = query(firestoreQuery, where("location.value", "==", location.values));
+    }
+
+    // Filter by guest count
+    firestoreQuery = query(firestoreQuery, where("guestCount", ">=", guestCount));
+
+    // Filter by room count
+    firestoreQuery = query(firestoreQuery, where("roomCount", ">=", roomCount));
+
+    // Filter by bathroom count
+    firestoreQuery = query(firestoreQuery, where("bathroomCount", ">=", bathroomCount));
+
+    // Fetch listings from Firestore
+    const querySnapshot = await getDocs(firestoreQuery);
+    const listings = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Update the URL with search parameters
     let currentQuery = {};
 
     if (params) {
@@ -67,7 +95,7 @@ const SearchModal = () => {
 
     const updatedQuery: any = {
       ...currentQuery,
-      locationValue: location?.value,
+      locationValue: location?.values,
       guestCount,
       roomCount,
       bathroomCount,
@@ -89,6 +117,7 @@ const SearchModal = () => {
       { skipNull: true }
     );
 
+    // Redirect to the search results page
     setStep(STEPS.LOCATION);
     searchModal.onClose();
     router.push(url);
@@ -132,7 +161,7 @@ const SearchModal = () => {
         onChange={(value) => setLocation(value as CountrySelectValue)}
       />
       <hr />
-      <Map center={location?.latlng} />
+      <Map center={location?.latlng ?? [0, 0]} />
     </div>
   );
 
@@ -175,7 +204,7 @@ const SearchModal = () => {
           }}
           value={bathroomCount}
           title="Bathrooms"
-          subtitle="How many bahtrooms do you need?"
+          subtitle="How many bathrooms do you need?"
         />
       </div>
     );

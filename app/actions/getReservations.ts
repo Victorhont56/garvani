@@ -1,4 +1,5 @@
-import prisma from "@/app/libs/prismadb";
+import { db } from "@/app/libs/firebase";
+import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 
 interface IParams {
   listingId?: string;
@@ -10,43 +11,49 @@ export default async function getReservations(params: IParams) {
   try {
     const { listingId, userId, authorId } = params;
 
-    const query: any = {};
+    let reservationsRef = collection(db, "reservations");
+
+    let conditions = [];
 
     if (listingId) {
-      query.listingId = listingId;
+      conditions.push(where("listingId", "==", listingId));
     }
 
     if (userId) {
-      query.userId = userId;
+      conditions.push(where("userId", "==", userId));
     }
 
-    if (authorId) {
-      query.listing = { userId: authorId };
-    }
+    const q = query(reservationsRef, ...conditions, orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
 
-    const reservations = await prisma.reservation.findMany({
-      where: query,
-      include: {
-        listing: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+    let reservations = querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        listingId: data.listingId || null, // Ensure listingId is included
+        createdAt: data.createdAt?.toDate().toISOString() || null,
+        startDate: data.startDate?.toDate().toISOString() || null,
+        endDate: data.endDate?.toDate().toISOString() || null,
+      };
     });
 
-    const safeReservations = reservations.map((reservation) => ({
-      ...reservation,
-      createdAt: reservation.createdAt.toISOString(),
-      startDate: reservation.startDate.toISOString(),
-      endDate: reservation.endDate.toISOString(),
-      listing: {
-        ...reservation.listing,
-        createdAt: reservation.listing.createdAt.toISOString(),
-      },
-    }));
+    // Handle authorId by filtering in code, since Firestore doesn't support relational joins
+    if (authorId) {
+      const listingsRef = collection(db, "listings");
+      const listingsQuery = query(listingsRef, where("userId", "==", authorId));
+      const listingsSnapshot = await getDocs(listingsQuery);
 
-    return safeReservations;
+      const authorListingsIds = listingsSnapshot.docs.map((doc) => doc.id);
+      
+      // ✅ Now that listingId is included, filtering will work
+      reservations = reservations.filter((reservation) => 
+        reservation.listingId && authorListingsIds.includes(reservation.listingId)
+      );
+    }
+
+    return reservations;
   } catch (error: any) {
-    throw new Error(error);
+    console.error("Error fetching reservations:", error);
+    throw new Error("Failed to fetch reservations.");
   }
 }

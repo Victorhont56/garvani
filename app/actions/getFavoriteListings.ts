@@ -1,30 +1,47 @@
-import prisma from "@/app/libs/prismadb";
-
 import getCurrentUser from "./getCurrentUser";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/app/libs/firebase";
+import { SafeListing } from "@/app/types"; // Ensure this import exists
 
-export default async function getFavoriteListings() {
+export default async function getFavoriteListings(): Promise<SafeListing[]> {
   try {
     const currentUser = await getCurrentUser();
 
-    if (!currentUser) {
+    if (!currentUser || !currentUser.favoriteIds || currentUser.favoriteIds.length === 0) {
       return [];
     }
 
-    const favorites = await prisma.listing.findMany({
-      where: {
-        id: {
-          in: [...(currentUser.favoriteIds || [])],
-        },
-      },
-    });
+    // Fetch each favorite listing individually
+    const favoriteListings: SafeListing[] = (
+      await Promise.all(
+        currentUser.favoriteIds.map(async (listingId: string) => {
+          const listingRef = doc(db, "listings", listingId);
+          const listingSnap = await getDoc(listingRef);
 
-    const safeFavorites = favorites.map((favorite) => ({
-      ...favorite,
-      createdAt: favorite.createdAt.toString(),
-    }));
+          if (!listingSnap.exists()) return null; // Return null if listing doesn't exist
 
-    return safeFavorites;
+          const data = listingSnap.data();
+
+          return {
+            id: listingSnap.id,
+            title: data.title || "Untitled",
+            description: data.description || "No description available",
+            imageSrc: data.imageSrc || "",
+            category: data.category || "Uncategorized",
+            roomCount: data.roomCount || 0,
+            bathroomCount: data.bathroomCount || 0,
+            guestCount: data.guestCount || 0,
+            locationValue: data.locationValue || "Unknown",
+            price: data.price || 0,
+            createdAt: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
+          } as SafeListing;
+        })
+      )
+    ).filter((listing): listing is SafeListing => listing !== null); // Remove null values
+
+    return favoriteListings;
   } catch (error: any) {
-    throw new Error(error);
+    console.error("Error fetching favorite listings:", error);
+    throw new Error(error.message || "Failed to fetch favorite listings.");
   }
 }

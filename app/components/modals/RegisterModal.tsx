@@ -1,15 +1,15 @@
 "use client";
 
-import axios from "axios";
 import { AiFillGithub } from "react-icons/ai";
-import { signIn } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+import { createUserWithEmailAndPassword, GithubAuthProvider, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 import useLoginModal from "@/app/hooks/useLoginModal";
 import useRegisterModal from "@/app/hooks/useRegisterModal";
+import { auth } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
 
 import Modal from "./Modal";
 import Input from "../inputs/Input";
@@ -36,15 +36,17 @@ const RegisterModal = () => {
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
-    axios
-      .post("/api/register", data)
-      .then(() => {
-        toast.success("Registered!");
+    // Firebase email/password registration
+    createUserWithEmailAndPassword(auth, data.email, data.password)
+      .then((userCredential) => {
+        // Signed up successfully
+        toast.success("Account created!");
         registerModal.onClose();
         loginModal.onOpen();
       })
       .catch((error) => {
-        toast.error("error");
+        // Handle errors
+        toast.error(error.message);
       })
       .finally(() => {
         setIsLoading(false);
@@ -94,13 +96,13 @@ const RegisterModal = () => {
         outline
         label="Continue with Google"
         icon={FcGoogle}
-        onClick={() => signIn("google")}
+        onClick={() => signInWithPopup(auth, new GoogleAuthProvider())} // Add Google login
       />
       <Button
         outline
         label="Continue with Github"
         icon={AiFillGithub}
-        onClick={() => signIn("github")}
+        onClick={() => signInWithPopup(auth, new GithubAuthProvider())} // Add GitHub login
       />
       <div
         className="

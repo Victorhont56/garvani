@@ -1,7 +1,7 @@
 // firestore.ts
 import { db } from "./firebase";
 import { collection, getDocs, addDoc, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
-import { Property, Booking } from "./types";
+import { Property } from "../../types";
 
 // Fetch all properties
 export const fetchProperties = async (): Promise<Property[]> => {
@@ -24,16 +24,18 @@ export const addProperty = async (property: Property): Promise<string | null> =>
     return null;
   }
 };
+interface Booking {
+  id: string;
+  userId: string;
+  // Add other properties
+}
 
-// Fetch bookings for a user
 export const fetchUserBookings = async (userId: string): Promise<Booking[]> => {
   const bookingsCollection = collection(db, "bookings");
   const bookingsSnapshot = await getDocs(bookingsCollection);
-  const bookings: Booking[] = bookingsSnapshot.docs
-    .map((doc: QueryDocumentSnapshot<DocumentData>) => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
-    .filter((booking: Booking) => booking.userId === userId);
-  return bookings;
+  const bookings: Booking[] = bookingsSnapshot.docs.map((doc) => ({
+    ...(doc.data() as Booking),
+  }));
+
+  return bookings.filter((booking) => booking.userId === userId);
 };

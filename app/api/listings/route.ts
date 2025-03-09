@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-
-import prisma from "@/app/libs/prismadb";
+import { db } from "@/app/libs/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import getCurrentUser from "@/app/actions/getCurrentUser";
 
 export async function POST(request: Request) {
@@ -23,26 +23,27 @@ export async function POST(request: Request) {
     price,
   } = body;
 
-  Object.keys(body).forEach((value: any) => {
-    if (!body[value]) {
-      NextResponse.error();
+  // Validate required fields
+  for (const key of Object.keys(body)) {
+    if (!body[key]) {
+      return NextResponse.error();
     }
+  }
+
+  // Create new listing in Firestore
+  const listingRef = await addDoc(collection(db, "listings"), {
+    title,
+    description,
+    imageSrc,
+    category,
+    roomCount,
+    bathroomCount,
+    guestCount,
+    locationValue: location?.value || "",
+    price: parseInt(price, 10),
+    userId: currentUser.email, // Use email as user ID reference in Firestore
+    createdAt: serverTimestamp(), // Store created timestamp
   });
 
-  const listing = await prisma.listing.create({
-    data: {
-      title,
-      description,
-      imageSrc,
-      category,
-      roomCount,
-      bathroomCount,
-      guestCount,
-      locationValue: location.value,
-      price: parseInt(price, 10),
-      userId: currentUser.id,
-    },
-  });
-
-  return NextResponse.json(listing);
+  return NextResponse.json({ id: listingRef.id, message: "Listing created successfully" });
 }

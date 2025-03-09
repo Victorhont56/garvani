@@ -2,14 +2,15 @@
 
 import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
-import { signIn } from "next-auth/react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { AiFillGithub } from "react-icons/ai";
 import { useRouter } from "next/navigation";
+import { GithubAuthProvider, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 
 import useRegisterModal from "@/app/hooks/useRegisterModal";
 import useLoginModal from "@/app/hooks/useLoginModal";
+import { auth } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
 
 import Modal from "./Modal";
 import Input from "../inputs/Input";
@@ -36,22 +37,21 @@ const LoginModal = () => {
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
-    signIn("credentials", {
-      ...data,
-      redirect: false,
-    }).then((callback) => {
-      setIsLoading(false);
-
-      if (callback?.ok) {
+    // Firebase email/password login
+    signInWithEmailAndPassword(auth, data.email, data.password)
+      .then((userCredential) => {
+        // Signed in successfully
         toast.success("Logged in");
         router.refresh();
         loginModal.onClose();
-      }
-
-      if (callback?.error) {
-        toast.error(callback.error);
-      }
-    });
+      })
+      .catch((error) => {
+        // Handle errors
+        toast.error(error.message);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const onToggle = useCallback(() => {
@@ -89,13 +89,13 @@ const LoginModal = () => {
         outline
         label="Continue with Google"
         icon={FcGoogle}
-        onClick={() => signIn("google")}
+        onClick={() => signInWithPopup(auth, new GoogleAuthProvider())} // Add Google login
       />
       <Button
         outline
         label="Continue with Github"
         icon={AiFillGithub}
-        onClick={() => signIn("github")}
+        onClick={() => signInWithPopup(auth, new GithubAuthProvider())} // Add GitHub login
       />
       <div
         className="
