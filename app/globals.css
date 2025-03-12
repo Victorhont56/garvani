@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '@fontsource/dm-sans'; /* Regular weight */
+@import '@fontsource/dm-sans/400.css'; /* Specify weight if needed */
+@import '@fontsource/dm-sans/700.css'; /* Bold weight */
+
+
 html,
 body,
 :root {

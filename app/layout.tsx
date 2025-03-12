@@ -7,15 +7,19 @@ import ToasterProvider from "./providers/ToasterProvider";
 import LoginModal from "./components/modals/LoginModal";
 import getCurrentUser from "./actions/getCurrentUser";
 import RentModal from "./components/modals/RentModal";
+import NavbarBottom from "./components/navbar/NavbarBottom";
+import Hero from './components/Hero/Hero';
+import Contact from "./components/Contact";
+import Footer from "./components/Footer";
+import AuthProvider from "./providers/AuthProvider";
+import ClientLayout from "./components/ClientLayout";
 
 export const metadata = {
   title: "Garvani",
   description: "Welcome to Garvani",
 };
 
-const font = Nunito({
-  subsets: ["latin"],
-});
+const font = Nunito({ subsets: ["latin"] });
 
 export default async function RootLayout({
   children,
@@ -23,17 +27,26 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const currentUser = await getCurrentUser();
+
   return (
     <html lang="en">
       <body className={font.className}>
-        <ClientOnly>
-          <ToasterProvider />
-          <RentModal />
-          <RegisterModal />
-          <LoginModal />
-          <Navbar currentUser={currentUser} />
-        </ClientOnly>
-        <div className="pb-20 pt-28">{children}</div>
+        <AuthProvider>
+          <ClientOnly>
+            <ToasterProvider />
+            <RentModal />
+            <RegisterModal />
+            <LoginModal />
+            <Navbar />
+            <NavbarBottom currentUser={currentUser} />
+            <ClientLayout>
+              <Hero />
+              <Contact />
+              <Footer />
+            </ClientLayout>
+          </ClientOnly>
+      
+        </AuthProvider>
       </body>
     </html>
   );

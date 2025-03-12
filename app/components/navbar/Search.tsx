@@ -63,6 +63,8 @@ const Search = () => {
         hover:shadow-md 
         transition 
         cursor-pointer
+        bg-[#F9FAFB]
+
       "
     >
       <div
@@ -112,9 +114,10 @@ const Search = () => {
           <div
             className="
               p-2 
-              bg-rose-500 
+              bg-primary
               rounded-full 
               text-white
+              hover:bg-hover
             "
           >
             <BiSearch size={18} />

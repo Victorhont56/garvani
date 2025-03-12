@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
-import { AiFillGithub } from "react-icons/ai";
 import { useRouter } from "next/navigation";
-import { GithubAuthProvider, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 
 import useRegisterModal from "@/app/hooks/useRegisterModal";
 import useLoginModal from "@/app/hooks/useLoginModal";
@@ -34,19 +33,31 @@ const LoginModal = () => {
     },
   });
 
+  useEffect(() => {
+    if (loginModal.isOpen) {
+      // Disable scrolling when modal is open
+      document.body.style.overflow = "hidden";
+    } else {
+      // Restore scrolling when modal is closed
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [loginModal.isOpen]);
+
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
 
     // Firebase email/password login
     signInWithEmailAndPassword(auth, data.email, data.password)
-      .then((userCredential) => {
-        // Signed in successfully
+      .then(() => {
         toast.success("Logged in");
         router.refresh();
         loginModal.onClose();
       })
       .catch((error) => {
-        // Handle errors
         toast.error(error.message);
       })
       .finally(() => {
@@ -89,27 +100,14 @@ const LoginModal = () => {
         outline
         label="Continue with Google"
         icon={FcGoogle}
-        onClick={() => signInWithPopup(auth, new GoogleAuthProvider())} // Add Google login
+        onClick={() => signInWithPopup(auth, new GoogleAuthProvider())}
       />
-      <Button
-        outline
-        label="Continue with Github"
-        icon={AiFillGithub}
-        onClick={() => signInWithPopup(auth, new GithubAuthProvider())} // Add GitHub login
-      />
-      <div
-        className="
-      text-neutral-500 text-center mt-4 font-light"
-      >
+      <div className="text-neutral-500 text-center mt-4 font-light">
         <p>
-          First time using Airbnb?
+          First time using Garvani?
           <span
             onClick={onToggle}
-            className="
-              text-neutral-800
-              cursor-pointer 
-              hover:underline
-            "
+            className="text-neutral-800 cursor-pointer hover:underline"
           >
             {" "}
             Create an account
@@ -120,16 +118,33 @@ const LoginModal = () => {
   );
 
   return (
-    <Modal
-      disabled={isLoading}
-      isOpen={loginModal.isOpen}
-      title="Login"
-      actionLabel="Continue"
-      onClose={loginModal.onClose}
-      onSubmit={handleSubmit(onSubmit)}
-      body={bodyContent}
-      footer={footerContent}
-    />
+    <>
+      {/* Backdrop */}
+      {loginModal.isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[500]"
+          onClick={loginModal.onClose}
+        />
+      )}
+
+      {/* Modal */}
+      <div
+        className={`fixed inset-0 flex items-center justify-center z-[1000] ${
+          loginModal.isOpen ? "pointer-events-auto" : "pointer-events-none"
+        }`}
+      >
+        <Modal
+          disabled={isLoading}
+          isOpen={loginModal.isOpen}
+          title="Login"
+          actionLabel="Continue"
+          onClose={loginModal.onClose}
+          onSubmit={handleSubmit(onSubmit)}
+          body={bodyContent}
+          footer={footerContent}
+        />
+      </div>
+    </>
   );
 };
 

@@ -1,7 +1,7 @@
 // firebase.ts
 import { initializeApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
-import { getAuth, Auth } from "firebase/auth";
+import { getAuth, Auth, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDk14EOfH2W0zJsBKdneq0by9fITRCkDpU",
@@ -21,5 +21,5 @@ const db: Firestore = getFirestore(app);
 
 // Initialize Authentication
 const auth: Auth = getAuth(app);
-
+setPersistence(auth, browserLocalPersistence);
 export { db, auth };

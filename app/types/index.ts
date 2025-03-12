@@ -33,7 +33,7 @@ export interface SafeUser {
   id: string;
   name: string | null;
   email: string;
-  emailVerified: string | null;
+  emailVerified: boolean;
   image?: string | null;
   hashedPassword?: string | null;
   favoriteIds: string[]; // Array of listing IDs

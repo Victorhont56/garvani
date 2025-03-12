@@ -1,5 +1,7 @@
 import { db } from "@/app/libs/firebase";
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, doc, getDoc } from "firebase/firestore";
+import { differenceInDays } from "date-fns";
+import { SafeReservation, SafeListing } from "@/app/types";
 
 interface IParams {
   listingId?: string;
@@ -12,7 +14,6 @@ export default async function getReservations(params: IParams) {
     const { listingId, userId, authorId } = params;
 
     let reservationsRef = collection(db, "reservations");
-
     let conditions = [];
 
     if (listingId) {
@@ -26,28 +27,45 @@ export default async function getReservations(params: IParams) {
     const q = query(reservationsRef, ...conditions, orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
 
-    let reservations = querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        listingId: data.listingId || null, // Ensure listingId is included
+    let reservations: SafeReservation[] = [];
+
+    for (const docSnap of querySnapshot.docs) {
+      const data = docSnap.data();
+
+      // ✅ Fetch listing data
+      const listingRef = doc(db, "listings", data.listingId);
+      const listingSnap = await getDoc(listingRef);
+
+      if (!listingSnap.exists()) continue;
+
+      const listing = listingSnap.data() as SafeListing;
+
+      // ✅ Calculate totalPrice based on date range
+      const startDate = data.startDate?.toDate();
+      const endDate = data.endDate?.toDate();
+      let totalPrice = 0;
+
+      if (startDate && endDate) {
+        const dayCount = differenceInDays(endDate, startDate);
+        totalPrice = dayCount * listing.price;
+      }
+
+      reservations.push({
+        id: docSnap.id,
+        listingId: data.listingId || null,
+        userId: data.userId || null,
+        startDate: startDate ? startDate.toISOString() : null,
+        endDate: endDate ? endDate.toISOString() : null,
         createdAt: data.createdAt?.toDate().toISOString() || null,
-        startDate: data.startDate?.toDate().toISOString() || null,
-        endDate: data.endDate?.toDate().toISOString() || null,
-      };
-    });
+        totalPrice, // ✅ Include totalPrice
+        listing, // ✅ Include listing data
+      });
+    }
 
-    // Handle authorId by filtering in code, since Firestore doesn't support relational joins
+    // ✅ Filter by authorId if necessary
     if (authorId) {
-      const listingsRef = collection(db, "listings");
-      const listingsQuery = query(listingsRef, where("userId", "==", authorId));
-      const listingsSnapshot = await getDocs(listingsQuery);
-
-      const authorListingsIds = listingsSnapshot.docs.map((doc) => doc.id);
-      
-      // ✅ Now that listingId is included, filtering will work
-      reservations = reservations.filter((reservation) => 
-        reservation.listingId && authorListingsIds.includes(reservation.listingId)
+      reservations = reservations.filter((reservation) =>
+        reservation.listing.userId === authorId
       );
     }
 

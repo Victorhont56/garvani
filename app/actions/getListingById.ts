@@ -1,48 +1,41 @@
 import { db } from "@/app/libs/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { SafeListing } from "@/app/types";
 
 interface IParams {
   listingId?: string;
 }
 
-export default async function getListingById(params: IParams) {
+export default async function getListingById(params: IParams): Promise<SafeListing | null> {
   try {
     const { listingId } = params;
     if (!listingId) return null;
 
-    // Reference to listing document
     const listingRef = doc(db, "listings", listingId);
     const listingSnap = await getDoc(listingRef);
 
-    if (!listingSnap.exists()) {
-      return null;
-    }
+    if (!listingSnap.exists()) return null;
 
-    const listing = listingSnap.data();
+    const data = listingSnap.data();
 
-    // Reference to user document if user details are needed
-    let user = null;
-    if (listing.userId) {
-      const userRef = doc(db, "users", listing.userId);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        const userData = userSnap.data();
-        user = {
-          ...userData,
-          createdAt: userData.createdAt?.toDate().toISOString() || null,
-          updatedAt: userData.updatedAt?.toDate().toISOString() || null,
-          emailVerified: userData.emailVerified?.toDate().toISOString() || null,
-        };
-      }
-    }
-
-    return {
-      ...listing,
+    // Ensure all SafeListing properties are present
+    const listing: SafeListing = {
       id: listingId,
-      createdAt: listing.createdAt?.toDate().toISOString() || null,
-      user, // Include user details if available
+      title: data?.title || "",
+      description: data?.description || "",
+      imageSrc: data?.imageSrc || "",
+      createdAt: data?.createdAt?.toDate().toISOString() || "",
+      category: data?.category || "",
+      roomCount: data?.roomCount || 0,
+      bathroomCount: data?.bathroomCount || 0,
+      guestCount: data?.guestCount || 0,
+      locationValue: data?.locationValue || "",
+      userId: data?.userId || "",
+      price: data?.price || 0,
     };
-  } catch (error: any) {
+
+    return listing;
+  } catch (error) {
     console.error("Error fetching listing by ID:", error);
     throw new Error("Failed to fetch listing.");
   }
