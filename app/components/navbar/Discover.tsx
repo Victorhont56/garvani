@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import MenuItem from "./MenuItem";
 import { useRouter } from "next/navigation";
 import { RiCompass3Line } from "react-icons/ri";
-import { IoClose } from "react-icons/io5";
+
 
 const Discover: React.FC = () => {
   const router = useRouter();
@@ -61,7 +61,7 @@ const Discover: React.FC = () => {
         >
         
           <div className="flex flex-col cursor-pointer">
-            <MenuItem onClick={() => handleMenuItemClick("/new-listings")} label="New Listings" />
+            <MenuItem onClick={() => handleMenuItemClick("/properties")} label="New Listings" />
             <MenuItem onClick={() => handleMenuItemClick("/lands")} label="Lands" />
             <MenuItem onClick={() => handleMenuItemClick("/luxurious-houses")} label="Luxurious Houses" />
             <MenuItem onClick={() => handleMenuItemClick("/commercial-buildings")} label="Commercial Buildings" />

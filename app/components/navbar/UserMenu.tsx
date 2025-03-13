@@ -85,9 +85,9 @@ const UserMenu: React.FC = () => {
           <div className="flex flex-col cursor-pointer">
             {currentUser ? (
               <>
-                <MenuItem onClick={() => router.push("/listings")} label="Listings" icon={<MdOutlinePlaylistAdd  size={20} />} />
-                <MenuItem onClick={() => router.push("/favourites")} label="Favourites" icon={<MdOutlineFavoriteBorder />} />
-                <MenuItem onClick={() => router.push("/reservations")} label="Reservations" icon={<MdOutlinePlaylistAddCheck size={20} />} />
+                <MenuItem onClick={() => router.push("/listings")} label="My Listings" icon={<MdOutlinePlaylistAdd  size={20} />} />
+                <MenuItem onClick={() => router.push("/favourites")} label="My Favourites" icon={<MdOutlineFavoriteBorder />} />
+                <MenuItem onClick={() => router.push("/reservations")} label="My Reservations" icon={<MdOutlinePlaylistAddCheck size={20} />} />
                 <MenuItem onClick={() => router.push("/inbox")} label="Inbox" icon={<MdForwardToInbox />} />
                 {/* ✅ Call updated handleSignOut */}
                 <MenuItem onClick={handleSignOut} label="Logout" icon={<LuLogOut  />} />

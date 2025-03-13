@@ -7,7 +7,7 @@ const ListingPage = () => {
     return (
        <>
            <div className="bg-green">
-                 <p>I am listing</p>
+                 <p >I am listing</p>
            </div>
        </>
     )

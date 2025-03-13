@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Nunito } from "next/font/google";
-import Navbar from "./components/navbar/Navbar";
+import Navbar from "./components/navbar/HeaderNav";
 import ClientOnly from "./components/ClientOnly";
 import RegisterModal from "./components/modals/RegisterModal";
 import ToasterProvider from "./providers/ToasterProvider";
@@ -13,6 +13,7 @@ import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import AuthProvider from "./providers/AuthProvider";
 import ClientLayout from "./components/ClientLayout";
+import { useState } from "react";
 
 export const metadata = {
   title: "Garvani",
@@ -39,13 +40,15 @@ export default async function RootLayout({
             <LoginModal />
             <Navbar />
             <NavbarBottom currentUser={currentUser} />
+            {/* ✅ Hero and Contact only on homepage */}
             <ClientLayout>
               <Hero />
               <Contact />
-              <Footer />
             </ClientLayout>
+            {/* ✅ Footer always visible */}
+            <div className="pb-20 pt-28">{children}</div>
+            <Footer /> 
           </ClientOnly>
-      
         </AuthProvider>
       </body>
     </html>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { BiSearch } from "react-icons/bi";
 import { differenceInDays } from "date-fns";
@@ -50,8 +50,12 @@ const Search = () => {
     return "Add Guests";
   }, [guestCount]);
 
-  return (
-    <div
+  const pathname = usePathname();
+  const isMainPage = pathname === "/";
+
+  if (!isMainPage) {
+    return (
+      <div
       onClick={searchModal.onOpen}
       className="
         border-[1px] 
@@ -125,6 +129,25 @@ const Search = () => {
         </div>
       </div>
     </div>
+    )
+  }
+
+  return (
+    <div
+      onClick={searchModal.onOpen}
+      className="
+              border-[2px]
+              w-[40px]
+              border-[#B7F2B8]
+              p-2 
+              bg-primary
+              rounded-full 
+              text-white
+              hover:bg-hover
+              font-bold
+            ">
+            <BiSearch size={20} />
+          </div>
   );
 };
 

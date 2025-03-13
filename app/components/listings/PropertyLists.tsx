@@ -206,12 +206,12 @@ const PropertyList = () => {
     <div className="px-4 py-8 font-satoshi">
       {/* Heading and Toggle */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Featured Properties</h2>
-        <div className="flex bg-text rounded-full p-1">
+        <h2 className="text-[20px] md:text-2xl lg:text-2xl font-bold">Featured Properties</h2>
+        <div className="flex bg-[#B7F2B8] rounded-full p-1">
           <button
             onClick={() => setSelectedListingType('buy')}
             className={`px-4 py-2 text-sm rounded-full ${
-              selectedListingType === 'buy' ? 'bg-primary text-text-500 font-bold' : 'text-white font-bold'
+              selectedListingType === 'buy' ? 'bg-primary text-text-500 font-bold' : 'text-text font-bold'
             } transition`}
           >
             Buy
@@ -219,7 +219,7 @@ const PropertyList = () => {
           <button
             onClick={() => setSelectedListingType('rent')}
             className={`px-4 py-2 text-sm rounded-full ${
-              selectedListingType === 'rent' ? 'bg-primary text-text-500 font-bold' : 'text-white font-bold'
+              selectedListingType === 'rent' ? 'bg-primary text-text-500 font-bold' : 'text-text font-bold'
             } transition`}
           >
             Rent
@@ -234,10 +234,10 @@ const PropertyList = () => {
         slidesPerView={4.5}
         navigation
         loop
-        className="mb-6"
+        className="mb-6 "
       >
         {categories.map((category) => (
-          <SwiperSlide key={category}>
+          <SwiperSlide  key={category}>
             <button
               onClick={() => setSelectedCategory(category)}
               className={`text-sm px-3 py-2 rounded-md ${

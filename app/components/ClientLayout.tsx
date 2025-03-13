@@ -10,10 +10,5 @@ export default function ClientLayout({
   const pathname = usePathname(); // ✅ Get current path
   const isHomePage = pathname === "/";
 
-  return (
-    <>
-      {/* Render Hero, Contact, and Footer only on homepage */}
-      {isHomePage && children}
-    </>
-  );
+  return <>{isHomePage && children}</>;
 }
