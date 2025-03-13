@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import MenuItem from "./MenuItem";
 import { useRouter } from "next/navigation";
-import { RiCompass3Line } from "react-icons/ri";
+import { CiCompass1 } from "react-icons/ci";
 
 
 const Discover: React.FC = () => {
@@ -44,12 +44,16 @@ const Discover: React.FC = () => {
   return (
     <div ref={containerRef} className="relative z-[5000]">
       {/* Discover Icon */}
-      <div
-        onClick={toggleOpen}
-        className="flex flex-col items-center cursor-pointer"
-      >
-        <RiCompass3Line size={40} />
-      </div>
+       <div onClick={toggleOpen} className="mt-[1px] text-primary hover:text-hover font-bold cursor-pointer">
+             <div className="flex flex-col items-center ">
+               <div >
+                 <CiCompass1 size={30} />
+               </div>
+               <div>
+                   <p className="text-[16px]">Explore</p>
+               </div>
+             </div>
+           </div>
 
       {/* Popup */}
       {isOpen && (

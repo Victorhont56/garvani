@@ -71,16 +71,20 @@ const UserMenu: React.FC = () => {
 
   return (
     <div className="relative" ref={menuRef}>
-      <div className="flex flex-row items-center gap-3">
-        <div onClick={toggleOpen} className="flex flex-col items-center cursor-pointer">
-          <LuCircleUser size={40} />
+      <div onClick={toggleOpen} className="mt-[10px] text-primary hover:text-hover cursor-pointer">
+        <div className="flex flex-col items-center ">
+          <div >
+            <LuCircleUser size={30} />
+          </div>
+          <div>
+              <p className="text-[16px]">Me</p>
+          </div>
         </div>
       </div>
-
       {isOpen && (
         <div
           className="absolute rounded-xl shadow-2xl w-[60vw] md:w-[30vw] lg:w-[20vw] 
-          bg-[#F9FAFB] overflow-hidden text-text font-bold right-0 bottom-12 z-[1000]"
+          bg-[#F9FAFB] overflow-hidden text-text font-bold right-0 bottom-12 z-[100000]"
         >
           <div className="flex flex-col cursor-pointer">
             {currentUser ? (

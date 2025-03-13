@@ -44,6 +44,7 @@ const SearchModal = () => {
     () =>
       dynamic(() => import("../Map"), {
         ssr: false,
+        loading: () => <p>Loading map...</p>,
       }),
     [location]
   );
@@ -161,7 +162,7 @@ const SearchModal = () => {
         onChange={(value) => setLocation(value as CountrySelectValue)}
       />
       <hr />
-      <Map center={location?.latlng ?? [0, 0]} />
+      <Map center={location?.latlng} />
     </div>
   );
 

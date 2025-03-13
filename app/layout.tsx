@@ -6,14 +6,14 @@ import RegisterModal from "./components/modals/RegisterModal";
 import ToasterProvider from "./providers/ToasterProvider";
 import LoginModal from "./components/modals/LoginModal";
 import getCurrentUser from "./actions/getCurrentUser";
-import RentModal from "./components/modals/RentModal";
 import NavbarBottom from "./components/navbar/NavbarBottom";
 import Hero from './components/Hero/Hero';
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import AuthProvider from "./providers/AuthProvider";
 import ClientLayout from "./components/ClientLayout";
-import { useState } from "react";
+import ListModal from "./components/modals/ListModal";
+
 
 export const metadata = {
   title: "Garvani",
@@ -31,11 +31,11 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={font.className}>
+      <body className='bg-[#f8f8fa]' >
         <AuthProvider>
           <ClientOnly>
             <ToasterProvider />
-            <RentModal />
+            <ListModal />
             <RegisterModal />
             <LoginModal />
             <Navbar />
