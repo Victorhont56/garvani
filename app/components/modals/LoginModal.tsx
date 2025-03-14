@@ -1,3 +1,4 @@
+// components/modals/LoginModal.tsx
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -54,8 +55,9 @@ const LoginModal = () => {
     signInWithEmailAndPassword(auth, data.email, data.password)
       .then(() => {
         toast.success("Logged in");
-        router.refresh();
-        loginModal.onClose();
+        router.push("/listings"); // Redirect to the listings page after login
+        router.refresh(); // Refresh the page to update the UI
+        loginModal.onClose(); // Close the login modal
       })
       .catch((error) => {
         toast.error(error.message);

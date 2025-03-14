@@ -12,11 +12,14 @@ export async function POST(request: Request) {
 
   const body = await request.json();
   const {
+    mode,
+    type,
     title,
     description,
     imageSrc,
     category,
-    roomCount,
+    livingroomCount,
+    bedroomCount,
     bathroomCount,
     guestCount,
     location,
@@ -32,11 +35,14 @@ export async function POST(request: Request) {
 
   // Create new listing in Firestore
   const listingRef = await addDoc(collection(db, "listings"), {
+    mode,
+    type,
     title,
     description,
     imageSrc,
     category,
-    roomCount,
+    livingroomCount,
+    bedroomCount,
     bathroomCount,
     guestCount,
     locationValue: location?.value || "",

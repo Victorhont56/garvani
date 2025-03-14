@@ -3,12 +3,15 @@
 // SafeListing type for Firebase
 export interface SafeListing {
   id: string;
+  mode: string;
+  type: string;
   title: string;
   description: string;
   imageSrc: string;
   createdAt: string;
   category: string;
-  roomCount: number;
+  livingroomCount: string;
+  bedroomCount: number;
   bathroomCount: number;
   guestCount: number;
   locationValue: string;

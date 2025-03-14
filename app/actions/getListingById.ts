@@ -21,12 +21,15 @@ export default async function getListingById(params: IParams): Promise<SafeListi
     // Ensure all SafeListing properties are present
     const listing: SafeListing = {
       id: listingId,
+      mode: data?.mode || "",
+      type:  data?.type || "",
       title: data?.title || "",
       description: data?.description || "",
       imageSrc: data?.imageSrc || "",
       createdAt: data?.createdAt?.toDate().toISOString() || "",
       category: data?.category || "",
-      roomCount: data?.roomCount || 0,
+      livingroomCount: data?.livingroomCount || 0,
+      bedroomCount: data?.bedroomCount || 0,
       bathroomCount: data?.bathroomCount || 0,
       guestCount: data?.guestCount || 0,
       locationValue: data?.locationValue || "",

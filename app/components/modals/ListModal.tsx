@@ -49,10 +49,10 @@ const ListModal = () => {
       type: "building", // Default to "building"
       category: "",
       location: null,
-      guestCount: 1,
-      livingrooms: 1,
-      roomCount: 1,
-      bathroomCount: 1,
+      guestCount: 0,
+      livingroomCount: 0,
+      bedroomCount: 0,
+      bathroomCount: 0,
       imageSrc: "",
       price: 1,
       title: "",
@@ -65,7 +65,8 @@ const ListModal = () => {
   const type = watch("type");
   const category = watch("category");
   const guestCount = watch("guestCount");
-  const roomCount = watch("roomCount");
+  const bedroomCount = watch("bedroomCount");
+  const livingroomCount = watch("livingroomCount");
   const bathroomCount = watch("bathroomCount");
   const imageSrc = watch("imageSrc");
 
@@ -122,7 +123,7 @@ const ListModal = () => {
     }
   };
 
-  const actionLabel = useMemo(() => {
+  let actionLabel = useMemo(() => {
     if (step === STEPS.PRICE) {
       return "Create";
     }
@@ -131,12 +132,14 @@ const ListModal = () => {
   }, [step]);
 
   const secondaryActionLabel = useMemo(() => {
-    if (step === STEPS.CATEGORY) {
-      return undefined;
+    if (step === STEPS.MODE) {
+      return undefined; // No back button on the first step
     }
 
-    return "Back";
+    return "Back"; // Show back button for all other steps
   }, [step]);
+
+  let isNextDisabled = false; // Default to false
 
   let bodyContent = (
     <div className="flex flex-col gap-8">
@@ -173,8 +176,9 @@ const ListModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="Is your property for rent or sale?"
-          subtitle=""
+          subtitle="Select an option"
         />
+        <hr />
         <div className="flex flex-row gap-4">
           <Button
             label="Rent"
@@ -196,8 +200,9 @@ const ListModal = () => {
       <div className="flex flex-col gap-8">
         <Heading
           title="Is your property a building or land?"
-          subtitle=""
+          subtitle="Select an option"
         />
+        <hr />
         <div className="flex flex-row gap-4">
           <Button
             label="Building"
@@ -214,6 +219,42 @@ const ListModal = () => {
     );
   }
 
+  if (step === STEPS.CATEGORY) {
+    bodyContent = (
+      <div className="flex flex-col gap-8">
+        <Heading
+          title="Which of these best describes your place?"
+          subtitle="Pick a category"
+        />
+        <div
+          className="
+            grid 
+            grid-cols-1 
+            md:grid-cols-2 
+            gap-3
+            max-h-[50vh]
+            overflow-y-auto
+          "
+        >
+          {categories.map((item) => (
+            <div key={item.label} className="col-span-1">
+              <CategoryInput
+                onClick={(category) => setCustomValue("category", category)}
+                selected={category === item.label}
+                label={item.label}
+                icon={item.icon}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    // Disable "Next" button if no category is selected
+    isNextDisabled = !category;
+    actionLabel = isNextDisabled ? "Select a category to continue" : "Next";
+  }
+
   if (step === STEPS.LOCATION) {
     bodyContent = (
       <div className="flex flex-col gap-8">
@@ -228,6 +269,10 @@ const ListModal = () => {
         <Map center={location?.latlng} />
       </div>
     );
+
+    // Disable "Next" button if no location is selected
+    isNextDisabled = !location;
+    actionLabel = isNextDisabled ? "Select a location to continue" : "Next";
   }
 
   if (step === STEPS.FEATURES) {
@@ -245,9 +290,16 @@ const ListModal = () => {
         />
         <hr />
         <Counter
-          onChange={(value) => setCustomValue("roomCount", value)}
-          value={roomCount}
-          title="Rooms"
+          onChange={(value) => setCustomValue("livingroomCount", value)}
+          value={livingroomCount}
+          title="Livingrooms"
+          subtitle="How many Livingrooms do you have?"
+        />
+        <hr />
+        <Counter
+          onChange={(value) => setCustomValue("bedroomCount", value)}
+          value={bedroomCount}
+          title="Bedrooms"
           subtitle="How many bedrooms do you have?"
         />
         <hr />
@@ -355,7 +407,8 @@ const ListModal = () => {
         }`}
       >
         <Modal
-          disabled={isLoading}
+          disabled={isLoading} // Disables the entire modal if loading
+          isNextDisabled={isNextDisabled} // Disables only the "Next" button
           isOpen={listModal.isOpen}
           title="Add a new Listing"
           actionLabel={actionLabel}
