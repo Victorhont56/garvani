@@ -14,6 +14,8 @@ import { MdForwardToInbox } from "react-icons/md";
 import { MdOutlinePlaylistAddCheck } from "react-icons/md";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
+import useListModal from "@/app/hooks/useListModal";
+
 
 
 const UserMenu: React.FC = () => {
@@ -23,10 +25,16 @@ const UserMenu: React.FC = () => {
   const loginModal = useLoginModal();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const listModal = useListModal();
 
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);
   }, []);
+
+  const handleListModal = useCallback(() => {
+    listModal.onOpen();
+    setIsOpen(false);
+  }, [listModal]);
 
   const handleClickOne = useCallback(() => {
     loginModal.onOpen();
@@ -111,6 +119,7 @@ const UserMenu: React.FC = () => {
           <div className="flex flex-col cursor-pointer">
             {currentUser ? (
               <>
+                <MenuItem onClick={handleListModal} label="Add a new Listing" icon={<MdOutlinePlaylistAdd  size={20} />} />
                 <MenuItem onClick={handleListings} label="My Listings" icon={<MdOutlinePlaylistAdd  size={20} />} />
                 <MenuItem onClick={handleFavorites} label="My Favourites" icon={<MdOutlineFavoriteBorder />} />
                 <MenuItem onClick={handleReservations} label="My Reservations" icon={<MdOutlinePlaylistAddCheck size={20} />} />

@@ -11,25 +11,36 @@ export default async function getListingById(
 ): Promise<(SafeListing & { user: SafeUser }) | null> {
   try {
     const { listingId } = params;
-    if (!listingId) return null;
+    if (!listingId) {
+      console.error("Listing ID is missing");
+      return null;
+    }
 
     const listingRef = doc(db, "listings", listingId);
     const listingSnap = await getDoc(listingRef);
 
-    if (!listingSnap.exists()) return null;
+    if (!listingSnap.exists()) {
+      console.error("Listing not found:", listingId);
+      return null;
+    }
 
     const data = listingSnap.data();
 
-    if (!data?.userId) return null;
+    if (!data?.userId) {
+      console.error("User ID is missing in listing data");
+      return null;
+    }
 
-    // ✅ Fetch user data
     const userRef = doc(db, "users", data.userId);
     const userSnap = await getDoc(userRef);
 
-    if (!userSnap.exists()) return null;
+    if (!userSnap.exists()) {
+      console.error("User not found:", data.userId);
+      return null;
+    }
 
     const userData = userSnap.data();
-    console.log("Listing ID:", params.listingId);
+    console.log("Listing ID:", listingId);
 
     const user: SafeUser = {
       id: userSnap.id,
@@ -37,13 +48,11 @@ export default async function getListingById(
       email: userData?.email || "",
       image: userData?.image || "",
       createdAt: userData?.createdAt?.toDate().toISOString() || "",
-      emailVerified: userData?.emailVerified || false, // ✅ Default to false
-      favoriteIds: userData?.favoriteIds || [], // ✅ Default to empty array
-      updatedAt: userData?.updatedAt?.toDate().toISOString() || "", // ✅ Default to empty string
+      emailVerified: userData?.emailVerified || false,
+      favoriteIds: userData?.favoriteIds || [],
+      updatedAt: userData?.updatedAt?.toDate().toISOString() || "",
     };
-    
 
-    // ✅ Ensure all SafeListing properties are present
     const listing: SafeListing = {
       id: listingId,
       mode: data?.mode || "",
@@ -62,7 +71,6 @@ export default async function getListingById(
       price: data?.price || 0,
     };
 
-    // ✅ Return listing with user attached
     return { ...listing, user };
   } catch (error) {
     console.error("Error fetching listing by ID:", error);

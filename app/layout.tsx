@@ -45,9 +45,7 @@ export default async function RootLayout({
               {/* ✅ Use flex-grow to push footer down */}
               <div className="flex-grow">
                 <ClientLayout>
-                  <Hero />
-                 
-                  <Contact />
+                  <Hero />            
                 </ClientLayout>
               </div>
               <div className="pb-20 pt-28">{children}</div>
