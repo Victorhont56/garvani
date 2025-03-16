@@ -14,7 +14,6 @@ import { MdForwardToInbox } from "react-icons/md";
 import { MdOutlinePlaylistAddCheck } from "react-icons/md";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
-import Listings from "@/app/listings/page";
 
 
 const UserMenu: React.FC = () => {
@@ -39,8 +38,31 @@ const UserMenu: React.FC = () => {
     setIsOpen(false);
   }, [registerModal]);
 
+  const handleListings = useCallback(() => {
+    router.push("/listings");
+    setIsOpen(false);
+  }, [router]);
+
+  const handleFavorites = useCallback(() => {
+    router.push("/favourites");
+    setIsOpen(false);
+  }, [router]);
+
+  const handleReservations = useCallback(() => {
+    router.push("/reservations");
+    setIsOpen(false);
+  }, [router]);
+
+  const handleInbox = useCallback(() => {
+    router.push("/inbox");
+    setIsOpen(false);
+  }, [router]);
+
+
   // ✅ Handle Firebase sign-out and update Zustand state
   const handleSignOut = async () => {
+    setIsOpen(false);
+
     try {
       await signOut(auth); // ✅ Firebase sign-out
       setCurrentUser(null); // ✅ Clear Zustand state
@@ -89,10 +111,10 @@ const UserMenu: React.FC = () => {
           <div className="flex flex-col cursor-pointer">
             {currentUser ? (
               <>
-                <MenuItem onClick={() => router.push("/listings")} label="My Listings" icon={<MdOutlinePlaylistAdd  size={20} />} />
-                <MenuItem onClick={() => router.push("/favourites")} label="My Favourites" icon={<MdOutlineFavoriteBorder />} />
-                <MenuItem onClick={() => router.push("/reservations")} label="My Reservations" icon={<MdOutlinePlaylistAddCheck size={20} />} />
-                <MenuItem onClick={() => router.push("/inbox")} label="Inbox" icon={<MdForwardToInbox />} />
+                <MenuItem onClick={handleListings} label="My Listings" icon={<MdOutlinePlaylistAdd  size={20} />} />
+                <MenuItem onClick={handleFavorites} label="My Favourites" icon={<MdOutlineFavoriteBorder />} />
+                <MenuItem onClick={handleReservations} label="My Reservations" icon={<MdOutlinePlaylistAddCheck size={20} />} />
+                <MenuItem onClick={handleInbox} label="Inbox" icon={<MdForwardToInbox />} />
                 {/* ✅ Call updated handleSignOut */}
                 <MenuItem onClick={handleSignOut} label="Logout" icon={<LuLogOut  />} />
                 

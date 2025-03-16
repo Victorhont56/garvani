@@ -1,18 +1,15 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { db } from "@/app/libs/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { SafeUser } from "@/app/types"; // Ensure SafeUser is correctly imported
-
-export async function getSession() {
-  return await getServerSession(authOptions);
-}
+import { SafeUser } from "@/app/types";
+import { authOptions } from "@/app/libs/auth"; // ✅ Import authOptions
 
 export default async function getCurrentUser(): Promise<SafeUser | null> {
   try {
-    const session = await getSession();
+    const session = await getServerSession(authOptions); // ✅ Use getServerSession()
 
     if (!session?.user?.email) {
+      console.log("Session not found or no email available");
       return null;
     }
 
@@ -21,24 +18,25 @@ export default async function getCurrentUser(): Promise<SafeUser | null> {
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
+      console.log("User document not found");
       return null;
     }
 
     const currentUser = userDoc.data();
 
     return {
-      id: session.user.email, // Use email as a unique identifier
+      id: session.user.email,
       name: currentUser.name || null,
       email: session.user.email,
       image: currentUser.image || null,
       createdAt: currentUser.createdAt?.toDate().toISOString() || null,
       updatedAt: currentUser.updatedAt?.toDate().toISOString() || null,
-      emailVerified: currentUser.emailVerified ? currentUser.emailVerified.toDate().toISOString() : null, // Ensure type consistency
-      favoriteIds: currentUser.favoriteIds || [], // Ensure this exists
-      hashedPassword: currentUser.hashedPassword || null, // Include hashedPassword if required
+      emailVerified: currentUser.emailVerified ? currentUser.emailVerified.toDate().toISOString() : null,
+      favoriteIds: currentUser.favoriteIds || [],
+      hashedPassword: currentUser.hashedPassword || null,
     };
   } catch (error: any) {
-    console.error("Error fetching current user:", error);
+    console.error("Error fetching current user:", error.message);
     return null;
   }
 }

@@ -1,42 +1,42 @@
 "use client";
 
 import { usePathname, useSearchParams } from "next/navigation";
-import { TbBeach, TbMountain, TbPool } from "react-icons/tb";
-import {
-  GiBarn,
-  GiBoatFishing,
-  GiCactus,
-  GiCastle,
-  GiCaveEntrance,
-  GiForestCamp,
-  GiIsland,
-  GiWindmill,
-} from "react-icons/gi";
-import { FaSkiing, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { BsSnow } from "react-icons/bs";
-import { IoDiamond } from "react-icons/io5";
-import { MdOutlineVilla } from "react-icons/md";
-
+import { LuBedSingle } from "react-icons/lu";
+import { LuBedDouble } from "react-icons/lu";
+import { LiaBedSolid } from "react-icons/lia";
+import { IoMan } from "react-icons/io5";
+import { LiaWarehouseSolid } from "react-icons/lia";
+import { GiFamilyHouse } from "react-icons/gi";
+import { MdOutlineOtherHouses } from "react-icons/md";
+import { BiBuildingHouse } from "react-icons/bi";
+import { FaShop } from "react-icons/fa6";
+import { FaHouseUser } from "react-icons/fa";
+import { GiBarn } from "react-icons/gi";
+import { PiFarmDuotone } from "react-icons/pi";
+import { GiCastle } from "react-icons/gi";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import CategoryBox from "../CategoryBox";
 import Container from "../Container";
 import { useRef } from "react";
+import { BsFillHousesFill } from "react-icons/bs";
+
 
 export const categories = [
-  { label: "Beach", icon: TbBeach, description: "This property is close to the beach!" },
-  { label: "Windmills", icon: GiWindmill, description: "This property has windmills!" },
-  { label: "Modern", icon: MdOutlineVilla, description: "This property is modern!" },
-  { label: "Countryside", icon: TbMountain, description: "This property is in the countryside!" },
-  { label: "Pools", icon: TbPool, description: "This property has a beautiful pool!" },
-  { label: "Islands", icon: GiIsland, description: "This property is on an island!" },
-  { label: "Lake", icon: GiBoatFishing, description: "This property is near a lake!" },
-  { label: "Skiing", icon: FaSkiing, description: "This property has skiing activities!" },
-  { label: "Castles", icon: GiCastle, description: "This property is an ancient castle!" },
-  { label: "Caves", icon: GiCaveEntrance, description: "This property is in a spooky cave!" },
-  { label: "Camping", icon: GiForestCamp, description: "This property offers camping activities!" },
-  { label: "Arctic", icon: BsSnow, description: "This property is in an arctic environment!" },
-  { label: "Desert", icon: GiCactus, description: "This property is in the desert!" },
-  { label: "Barns", icon: GiBarn, description: "This property is in a barn!" },
-  { label: "Lux", icon: IoDiamond, description: "This property is luxurious!" },
+  { label: "Single-Room", icon: LuBedSingle, description: "This is a single room apartment" },
+  { label: "Room-and-Parlour", icon: LuBedDouble, description: "This is a one bedroom and parlour apartment" },
+  { label: "2-Bedroom-Flat", icon: LiaBedSolid, description: "This is a two bedroom apartment" },
+  { label: "Self-contain", icon: IoMan, description: "This is a self-contain" },
+  { label: "Duplex", icon: BiBuildingHouse, description: "This is a duplex" },
+  { label: "Storey-building", icon: GiFamilyHouse, description: "This is a storey Building" },
+  { label: "Bungalow", icon: MdOutlineOtherHouses, description: "This is a bungalow" },
+  { label: "Stylish", icon:  GiCastle, description: "This property is stylish" },
+  { label: "Semi-Detached", icon: BsFillHousesFill, description: "This property is semi-detached" },
+  { label: "Detached", icon: BiBuildingHouse, description: "This property is detached" },
+  { label: "Commercial", icon: FaShop, description: "This property is for commercial purpose" },
+  { label: "Residential", icon: FaHouseUser, description: "This property is for residential purpose" },
+  { label: "Storage", icon: GiBarn, description: "This property is for storage" },
+  { label: "Agriculture", icon: PiFarmDuotone, description: "This property is for agriculture" },
+  { label: "Warehouse", icon: LiaWarehouseSolid, description: "This is a warehouse" },
 ];
 
 const Categories = () => {
@@ -62,7 +62,7 @@ const Categories = () => {
 
   return (
     <Container>
-      <div className="relative">
+      <div className="relative pt-4">
         {/* ✅ Left Arrow */}
         <button
           onClick={(e) => {

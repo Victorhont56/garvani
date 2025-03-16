@@ -1,15 +1,18 @@
 import EmptyState from "@/app/components/EmptyState";
 import ClientOnly from "@/app/components/ClientOnly";
-
 import getCurrentUser from "@/app/actions/getCurrentUser";
 import getReservations from "@/app/actions/getReservations";
-
 import TripsClient from "./ReservationsClient";
+import ProtectedRoute from "../components/ProtectedRoute";
+
 
 const ReservationsPage = async () => {
   const currentUser = await getCurrentUser();
 
+  console.log("Current User:", currentUser);
+
   if (!currentUser) {
+    console.log("No user found, unauthorized");
     return (
       <ClientOnly>
         <EmptyState title="Unauthorized" subtitle="Please login" />
@@ -18,6 +21,8 @@ const ReservationsPage = async () => {
   }
 
   const reservations = await getReservations({ authorId: currentUser.id });
+
+  console.log("Reservations:", reservations);
 
   if (reservations.length === 0) {
     return (

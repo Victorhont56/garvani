@@ -2,10 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { IconType } from "react-icons";
-
 import useCountries from "@/app/hooks/useCountries";
 import { SafeUser } from "@/app/types";
-
 import Avatar from "../Avatar";
 import ListingCategory from "./ListingCategory";
 
@@ -15,9 +13,12 @@ const Map = dynamic(() => import("../Map"), {
 
 interface ListingInfoProps {
   user?: SafeUser | null; // ✅ Allows undefined/null
+  mode: string;
+  type: string;
   description: string;
+  livingroomCount: number;
   guestCount: number;
-  roomCount: number;
+  bedroomCount: number;
   bathroomCount: number;
   category:
     | {
@@ -31,9 +32,12 @@ interface ListingInfoProps {
 
 const ListingInfo: React.FC<ListingInfoProps> = ({
   user,
+  mode,
+  type,
   description,
+  livingroomCount,
   guestCount,
-  roomCount,
+  bedroomCount,
   bathroomCount,
   category,
   locationValue,
@@ -68,8 +72,11 @@ const ListingInfo: React.FC<ListingInfoProps> = ({
             text-neutral-500
           "
         >
+          <div>{mode}</div>
+          <div>{type}</div>
+          <div>{livingroomCount} Livingrooms</div>
           <div>{guestCount} guests</div>
-          <div>{roomCount} rooms</div>
+          <div>{bedroomCount} rooms</div>
           <div>{bathroomCount} bathrooms</div>
         </div>
       </div>

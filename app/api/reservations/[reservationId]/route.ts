@@ -21,7 +21,6 @@ export async function DELETE(request: Request, { params }: { params: IParams }) 
   }
 
   try {
-    // Get the reservation document
     const reservationRef = doc(db, "reservations", reservationId);
     const reservationSnap = await getDoc(reservationRef);
 
@@ -31,13 +30,11 @@ export async function DELETE(request: Request, { params }: { params: IParams }) 
 
     const reservationData = reservationSnap.data();
 
-    // Check if the user is the reservation owner
     if (reservationData.userId === currentUser.id) {
       await deleteDoc(reservationRef);
       return NextResponse.json({ message: "Reservation deleted successfully" });
     }
 
-    // If not the owner, check if they are the listing owner
     const listingsRef = collection(db, "listings");
     const q = query(listingsRef, where("id", "==", reservationData.listingId), where("userId", "==", currentUser.id));
     const listingSnap = await getDocs(q);
@@ -47,7 +44,6 @@ export async function DELETE(request: Request, { params }: { params: IParams }) 
       return NextResponse.json({ message: "Reservation deleted by listing owner" });
     }
 
-    // If not authorized
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   } catch (error: any) {
     console.error("Error deleting reservation:", error);

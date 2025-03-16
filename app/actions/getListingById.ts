@@ -1,12 +1,14 @@
 import { db } from "@/app/libs/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { SafeListing } from "@/app/types";
+import { SafeListing, SafeUser } from "@/app/types";
 
 interface IParams {
   listingId?: string;
 }
 
-export default async function getListingById(params: IParams): Promise<SafeListing | null> {
+export default async function getListingById(
+  params: IParams
+): Promise<(SafeListing & { user: SafeUser }) | null> {
   try {
     const { listingId } = params;
     if (!listingId) return null;
@@ -18,11 +20,34 @@ export default async function getListingById(params: IParams): Promise<SafeListi
 
     const data = listingSnap.data();
 
-    // Ensure all SafeListing properties are present
+    if (!data?.userId) return null;
+
+    // ✅ Fetch user data
+    const userRef = doc(db, "users", data.userId);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) return null;
+
+    const userData = userSnap.data();
+    console.log("Listing ID:", params.listingId);
+
+    const user: SafeUser = {
+      id: userSnap.id,
+      name: userData?.name || "",
+      email: userData?.email || "",
+      image: userData?.image || "",
+      createdAt: userData?.createdAt?.toDate().toISOString() || "",
+      emailVerified: userData?.emailVerified || false, // ✅ Default to false
+      favoriteIds: userData?.favoriteIds || [], // ✅ Default to empty array
+      updatedAt: userData?.updatedAt?.toDate().toISOString() || "", // ✅ Default to empty string
+    };
+    
+
+    // ✅ Ensure all SafeListing properties are present
     const listing: SafeListing = {
       id: listingId,
       mode: data?.mode || "",
-      type:  data?.type || "",
+      type: data?.type || "",
       title: data?.title || "",
       description: data?.description || "",
       imageSrc: data?.imageSrc || "",
@@ -37,7 +62,8 @@ export default async function getListingById(params: IParams): Promise<SafeListi
       price: data?.price || 0,
     };
 
-    return listing;
+    // ✅ Return listing with user attached
+    return { ...listing, user };
   } catch (error) {
     console.error("Error fetching listing by ID:", error);
     throw new Error("Failed to fetch listing.");

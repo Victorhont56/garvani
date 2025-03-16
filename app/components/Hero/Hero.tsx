@@ -1,5 +1,4 @@
 'use client'
-import PropertyLists from '../listings/PropertyLists'
 import HeroOne from './HeroOne'
 
 const Hero = () => {
@@ -7,7 +6,6 @@ const Hero = () => {
         <>
             <div>
                 <HeroOne />
-                <PropertyLists />
            </div>
         </>
     )

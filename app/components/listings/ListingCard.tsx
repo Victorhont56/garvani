@@ -8,6 +8,7 @@ import useCountries from "@/app/hooks/useCountries";
 import { SafeListing, SafeReservation, SafeUser } from "@/app/types/index";
 import Button from "../Button";
 import HeartButton from "../HeartButton";
+import { TbCurrencyNaira } from "react-icons/tb";
 
 interface ListingCardProps {
   data: SafeListing;
@@ -68,7 +69,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   return (
     <div
       onClick={() => router.push(`/listings/${data.id}`)}
-      className="col-span-1 cursor-pointer group"
+      className="col-span-1 bg-white cursor-pointer rounded-3xl shadow-lg group"
     >
       <div className="flex flex-col gap-2 w-full">
         <div
@@ -102,24 +103,31 @@ const ListingCard: React.FC<ListingCardProps> = ({
             <HeartButton listingId={data.id} currentUser={currentUser} />
           </div>
         </div>
-        <div className="font-semibold text-lg">
-          {location?.region}, {location?.label}
-        </div>
-        <div className="font-light text-neutral-500">
-          {reservationDate || data.category}
-        </div>
-        <div className="flex flex-row items-center gap-1">
-          <div className="font-semibold">$ {price}</div>
-          {!reservation && <div className="font-light">night</div>}
-        </div>
-        {onAction && actionLabel && (
-          <Button
-            disabled={disabled}
-            small
-            label={actionLabel}
-            onClick={handleCancel}
-          />
-        )}
+        <div className="m-2 text-[15px]">
+          <div className="font-semibold flex flex-row justify-between ">
+            <div>For {data.mode}</div> <div className="font-light text-neutral-500"> {data.category}</div>
+          </div>
+          <div className="font-semibold text-lg">
+            {location?.region}, {location?.label}
+          </div>
+          <div className="font-light text-neutral-500">
+            {reservationDate}
+          </div>
+          
+          <div className="">
+            {!reservation && <div className="font-semibold flex flex-row justify-between ">
+            <div className="flex flex-row items-center"><TbCurrencyNaira size={20} /> {price}</div> <div className="font-light text-neutral-500 text-[15px]"> Per Month</div>
+          </div>}
+          </div>
+          {onAction && actionLabel && (
+            <Button
+              disabled={disabled}
+              small
+              label={actionLabel}
+              onClick={handleCancel}
+            />
+          )}
+         </div>
       </div>
     </div>
   );

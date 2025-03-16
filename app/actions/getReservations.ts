@@ -27,20 +27,29 @@ export default async function getReservations(params: IParams) {
     const q = query(reservationsRef, ...conditions, orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
 
+    // If no reservations are found, return an empty array
+    if (querySnapshot.empty) {
+      return [];
+    }
+
     let reservations: SafeReservation[] = [];
 
     for (const docSnap of querySnapshot.docs) {
       const data = docSnap.data();
 
-      // ✅ Fetch listing data
+      // Fetch listing data
       const listingRef = doc(db, "listings", data.listingId);
       const listingSnap = await getDoc(listingRef);
 
-      if (!listingSnap.exists()) continue;
+      // Skip if the listing doesn't exist
+      if (!listingSnap.exists()) {
+        console.warn(`Listing not found for reservation: ${docSnap.id}`);
+        continue;
+      }
 
       const listing = listingSnap.data() as SafeListing;
 
-      // ✅ Calculate totalPrice based on date range
+      // Calculate totalPrice based on date range
       const startDate = data.startDate?.toDate();
       const endDate = data.endDate?.toDate();
       let totalPrice = 0;
@@ -57,21 +66,22 @@ export default async function getReservations(params: IParams) {
         startDate: startDate ? startDate.toISOString() : null,
         endDate: endDate ? endDate.toISOString() : null,
         createdAt: data.createdAt?.toDate().toISOString() || null,
-        totalPrice, // ✅ Include totalPrice
-        listing, // ✅ Include listing data
+        totalPrice, // Include totalPrice
+        listing, // Include listing data
       });
     }
 
-    // ✅ Filter by authorId if necessary
+    // Filter by authorId if necessary
     if (authorId) {
-      reservations = reservations.filter((reservation) =>
-        reservation.listing.userId === authorId
+      reservations = reservations.filter(
+        (reservation) => reservation.listing.userId === authorId
       );
     }
 
     return reservations;
   } catch (error: any) {
     console.error("Error fetching reservations:", error);
-    throw new Error("Failed to fetch reservations.");
+    // Return an empty array instead of throwing an error
+    return [];
   }
 }

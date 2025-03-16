@@ -1,6 +1,5 @@
-// userService.ts
 import { db } from "./firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 interface UserData {
   id: string;
@@ -10,9 +9,10 @@ interface UserData {
 
 export const addUserToDatabase = async (userData: UserData) => {
   try {
-    await addDoc(collection(db, "users"), userData);
-    console.log("User added successfully!");
+    console.log("📢 Attempting to add user to Firestore:", userData);
+    await setDoc(doc(db, "users", userData.id), userData);
+    console.log("✅ User added successfully to Firestore!");
   } catch (error) {
-    console.error("Error adding user:", error);
+    console.error("🔥 Error adding user to Firestore:", error);
   }
 };

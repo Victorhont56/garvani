@@ -7,8 +7,17 @@ const nextConfig = {
     domains: [
       "avatars.githubusercontent.com",
       "lh3.googleusercontent.com",
-      "res.cloudinary.com",
+      "res.cloudinary.com"
     ],
+  },
+  reactStrictMode: true,
+  async rewrites() {
+    return [
+      {
+        source: "/listings/:path*",
+        destination: "/listings/[listingId]",
+      },
+    ];
   },
 };
 

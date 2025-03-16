@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Nunito } from "next/font/google";
-import Navbar from "./components/navbar/HeaderNav";
+
+import HeaderNav from "./components/navbar/HeaderNav";
 import ClientOnly from "./components/ClientOnly";
 import RegisterModal from "./components/modals/RegisterModal";
 import ToasterProvider from "./providers/ToasterProvider";
@@ -13,7 +14,7 @@ import Footer from "./components/Footer";
 import AuthProvider from "./providers/AuthProvider";
 import ClientLayout from "./components/ClientLayout";
 import ListModal from "./components/modals/ListModal";
-
+import SessionProviderWrapper from "./providers/SessionProviderWrapper";
 
 export const metadata = {
   title: "Garvani",
@@ -31,25 +32,29 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className='bg-[#f8f8fa]' >
-        <AuthProvider>
-          <ClientOnly>
-            <ToasterProvider />
-            <ListModal />
-            <RegisterModal />
-            <LoginModal />
-            <Navbar />
-            <NavbarBottom currentUser={currentUser} />
-            {/* ✅ Hero and Contact only on homepage */}
-            <ClientLayout>
-              <Hero />
-              <Contact />
-            </ClientLayout>
-            {/* ✅ Footer always visible */}
-            <div className="pb-20 pt-28">{children}</div>
-            <Footer /> 
-          </ClientOnly>
-        </AuthProvider>
+      <body className="bg-white flex flex-col min-h-screen">
+        <SessionProviderWrapper>
+          <AuthProvider>
+            <ClientOnly>
+              <ToasterProvider />
+              <ListModal />
+              <RegisterModal />
+              <LoginModal />
+              <HeaderNav />
+              <NavbarBottom currentUser={currentUser} />    
+              {/* ✅ Use flex-grow to push footer down */}
+              <div className="flex-grow">
+                <ClientLayout>
+                  <Hero />
+                 
+                  <Contact />
+                </ClientLayout>
+              </div>
+              <div className="pb-20 pt-28">{children}</div>
+              <Footer /> {/* ✅ Footer stays at bottom */}
+            </ClientOnly>
+          </AuthProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );

@@ -57,11 +57,14 @@ const RegisterModal = () => {
         data.email,
         data.password
       );
+     
+     
       const user = userCredential.user;
-
+      console.log("✅ User registered with Firebase Auth:", user);
       
 
       // ✅ Save user to Firestore
+      console.log("📢 Saving user to Firestore...");
       await addUserToDatabase({
         id: user.uid,
         name: data.name,

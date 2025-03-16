@@ -4,10 +4,8 @@ import { toast } from "react-hot-toast";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { doc, deleteDoc } from "firebase/firestore";
-
 import { SafeReservation, SafeUser } from "@/app/types";
 import { db } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
-
 import Heading from "@/app/components/Heading";
 import Container from "@/app/components/Container";
 import ListingCard from "@/app/components/listings/ListingCard";
@@ -44,6 +42,7 @@ const ReservationsClient: React.FC<ReservationsClientProps> = ({
   );
 
   return (
+    
     <Container>
       <Heading title="Reservations" subtitle="Bookings on your properties" />
       <div

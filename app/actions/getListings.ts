@@ -53,7 +53,6 @@ export default async function getListings(params: IListingsParams) {
       conditions.push(where("locationValue", "==", locationValue));
     }
 
-    // Firestore doesn't support `NOT` queries directly, so we have to filter unavailable listings in code
     let availableListings: any[] = [];
 
     if (startDate && endDate) {
@@ -83,11 +82,9 @@ export default async function getListings(params: IListingsParams) {
       return availableListings;
     }
 
-    // Create query with conditions and sorting
     let q = query(listingsRef, ...conditions, orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
 
-    // Map Firestore documents into usable JSON format
     const listings = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),

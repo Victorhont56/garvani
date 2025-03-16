@@ -10,7 +10,7 @@ export interface SafeListing {
   imageSrc: string;
   createdAt: string;
   category: string;
-  livingroomCount: string;
+  livingroomCount: number;
   bedroomCount: number;
   bathroomCount: number;
   guestCount: number;
