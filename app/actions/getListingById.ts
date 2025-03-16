@@ -16,13 +16,17 @@ export default async function getListingById(
       return null;
     }
 
+    console.log("Fetching listing with ID:", listingId);
+
     const listingRef = doc(db, "listings", listingId);
     const listingSnap = await getDoc(listingRef);
 
     if (!listingSnap.exists()) {
-      console.error("Listing not found:", listingId);
+      console.error("Listing not found for ID:", listingId);
       return null;
     }
+
+    console.log("Listing data:", listingSnap.data());
 
     const data = listingSnap.data();
 

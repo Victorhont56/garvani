@@ -4,12 +4,14 @@ import getReservations from "@/app/actions/getReservations";
 import ListingClient from "./ListingClient";
 import EmptyState from "@/app/components/EmptyState";
 
+
 interface IParams {
   listingId?: string;
 }
 
 const ListingPage = async ({ params }: { params: IParams }) => {
   const { listingId } = params;
+  console.log("Listing ID from params:", listingId);
 
   // Early return if listingId is missing
   if (!listingId) {

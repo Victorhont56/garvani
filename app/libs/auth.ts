@@ -71,14 +71,17 @@ export const authOptions: AuthOptions = {
       if (user) {
         token.id = user.id;
         token.email = user.email;
+        token.name = user.name || ""; // Add user name if available
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user = session.user ?? ({} as any); // Ensure session.user exists
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
+        session.user = {
+          id: token.id as string,
+          email: token.email as string,
+          name: token.name || "", // Include name if available
+        };
       }
       return session;
     },

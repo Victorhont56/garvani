@@ -17,6 +17,8 @@ import Input from "../inputs/Input";
 import Heading from "../Heading";
 import useListModal from "@/app/hooks/useListModal";
 import Button from "../Button";
+import { useAuth } from '@/app/hooks/useAuth';
+
 
 enum STEPS {
   MODE = 0,
@@ -35,6 +37,7 @@ const ListModal = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(STEPS.MODE); // Start with MODE step
+
 
   const {
     register,
@@ -96,19 +99,31 @@ const ListModal = () => {
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     if (step !== STEPS.PRICE) {
-      return onNext();
+      return onNext(); 
     }
+
+    
+  if (!data.category || !data.location || !data.imageSrc) {
+    toast.error("Please fill all required fields.");
+    return;
+  }
 
     setIsLoading(true);
 
     try {
       // Save the listing to Firestore
       const listingsRef = collection(db, "listings");
-      await addDoc(listingsRef, {
+      const newData = {
         ...data,
+        location: {
+          lat: data.location.latlng[0], // Ensure location is properly formatted
+          lng: data.location.latlng[1],
+        },
+        price: Number(data.price), // Ensure price is a number
         createdAt: new Date().toISOString(),
-      });
-
+      };
+  
+      await addDoc(listingsRef, newData);
       // Success
       toast.success("Listing created!");
       router.refresh();
@@ -117,7 +132,8 @@ const ListModal = () => {
       listModal.onClose();
     } catch (error) {
       // Handle errors
-      toast.error("Something went wrong.");
+      console.error("Error creating listing:", error);
+      toast.error("Error creating listing");
     } finally {
       setIsLoading(false);
     }

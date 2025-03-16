@@ -23,4 +23,13 @@ setPersistence(auth, browserLocalPersistence)
     console.error("Failed to set auth persistence:", error)
   );
 
+  // Listen for auth state changes
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    console.log("User is logged in:", user.email);
+  } else {
+    console.log("No user found, unauthorized");
+  }
+});
+
 export { db, auth };

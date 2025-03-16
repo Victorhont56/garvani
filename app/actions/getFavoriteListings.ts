@@ -24,11 +24,15 @@ export default async function getFavoriteListings(): Promise<SafeListing[]> {
 
           return {
             id: listingSnap.id,
+            userId: data.userId || "",
+            mode: data.mode || "rent",
+            type: data.type  || "building",
             title: data.title || "Untitled",
             description: data.description || "No description available",
             imageSrc: data.imageSrc || "",
             category: data.category || "Uncategorized",
-            roomCount: data.roomCount || 0,
+            livingroomCount: data.livingroomCount || 0,
+            bedroomCount: data.bedroomCount || 0,
             bathroomCount: data.bathroomCount || 0,
             guestCount: data.guestCount || 0,
             locationValue: data.locationValue || "Unknown",
