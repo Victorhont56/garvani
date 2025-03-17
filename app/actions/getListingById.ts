@@ -1,6 +1,6 @@
 import { db } from "@/app/libs/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { SafeListing, SafeUser } from "@/app/types";
+import { SafeListing, SafeUser } from "@/app/types/index";
 
 interface IParams {
   listingId?: string;
@@ -11,8 +11,9 @@ export default async function getListingById(
 ): Promise<(SafeListing & { user: SafeUser }) | null> {
   try {
     const { listingId } = params;
-    if (!listingId) {
-      console.error("Listing ID is missing");
+
+    if (!listingId || Array.isArray(listingId)) {
+      console.error("Invalid Listing ID:", listingId);
       return null;
     }
 
@@ -26,9 +27,8 @@ export default async function getListingById(
       return null;
     }
 
-    console.log("Listing data:", listingSnap.data());
-
     const data = listingSnap.data();
+    console.log("Listing data:", data);
 
     if (!data?.userId) {
       console.error("User ID is missing in listing data");
@@ -39,22 +39,25 @@ export default async function getListingById(
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
-      console.error("User not found:", data.userId);
+      console.error("User not found for ID:", data.userId);
       return null;
     }
 
     const userData = userSnap.data();
-    console.log("Listing ID:", listingId);
 
     const user: SafeUser = {
       id: userSnap.id,
       name: userData?.name || "",
       email: userData?.email || "",
       image: userData?.image || "",
-      createdAt: userData?.createdAt?.toDate().toISOString() || "",
+      createdAt: userData?.createdAt?.toDate
+        ? userData.createdAt.toDate().toISOString()
+        : "",
       emailVerified: userData?.emailVerified || false,
       favoriteIds: userData?.favoriteIds || [],
-      updatedAt: userData?.updatedAt?.toDate().toISOString() || "",
+      updatedAt: userData?.updatedAt?.toDate
+        ? userData.updatedAt.toDate().toISOString()
+        : "",
     };
 
     const listing: SafeListing = {
@@ -64,7 +67,9 @@ export default async function getListingById(
       title: data?.title || "",
       description: data?.description || "",
       imageSrc: data?.imageSrc || "",
-      createdAt: data?.createdAt?.toDate().toISOString() || "",
+      createdAt: data?.createdAt?.toDate
+        ? data.createdAt.toDate().toISOString()
+        : "",
       category: data?.category || "",
       livingroomCount: data?.livingroomCount || 0,
       bedroomCount: data?.bedroomCount || 0,

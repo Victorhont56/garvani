@@ -5,7 +5,7 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/app/libs/firebase"; // Adjust the path to your Firebase config
 import Modal from "./Modal";
 import Counter from "../inputs/Counter";
@@ -17,8 +17,6 @@ import Input from "../inputs/Input";
 import Heading from "../Heading";
 import useListModal from "@/app/hooks/useListModal";
 import Button from "../Button";
-import { useAuth } from '@/app/hooks/useAuth';
-
 
 enum STEPS {
   MODE = 0,
@@ -37,7 +35,6 @@ const ListModal = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(STEPS.MODE); // Start with MODE step
-
 
   const {
     register,
@@ -72,13 +69,16 @@ const ListModal = () => {
   const livingroomCount = watch("livingroomCount");
   const bathroomCount = watch("bathroomCount");
   const imageSrc = watch("imageSrc");
+  const title = watch("title");
+  const description = watch("description");
+  const price = watch("price");
 
   const Map = useMemo(
     () =>
       dynamic(() => import("../Map"), {
         ssr: false,
       }),
-    []
+    [location]
   );
 
   const setCustomValue = (id: string, value: any) => {
@@ -99,14 +99,21 @@ const ListModal = () => {
 
   const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     if (step !== STEPS.PRICE) {
-      return onNext(); 
+      return onNext();
     }
 
-    
-  if (!data.category || !data.location || !data.imageSrc) {
-    toast.error("Please fill all required fields.");
-    return;
-  }
+    // Validate all required fields before submitting
+    if (
+      !data.category ||
+      !data.location ||
+      !data.imageSrc ||
+      !data.title ||
+      !data.description ||
+      !data.price
+    ) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
 
     setIsLoading(true);
 
@@ -120,10 +127,11 @@ const ListModal = () => {
           lng: data.location.latlng[1],
         },
         price: Number(data.price), // Ensure price is a number
-        createdAt: new Date().toISOString(),
+        createdAt: serverTimestamp(),
       };
-  
+
       await addDoc(listingsRef, newData);
+
       // Success
       toast.success("Listing created!");
       router.refresh();
@@ -131,19 +139,17 @@ const ListModal = () => {
       setStep(STEPS.MODE);
       listModal.onClose();
     } catch (error) {
-      // Handle errors
       console.error("Error creating listing:", error);
-      toast.error("Error creating listing");
+      toast.error("Error creating listing. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  let actionLabel = useMemo(() => {
+  const actionLabel = useMemo(() => {
     if (step === STEPS.PRICE) {
       return "Create";
     }
-
     return "Next";
   }, [step]);
 
@@ -151,11 +157,25 @@ const ListModal = () => {
     if (step === STEPS.MODE) {
       return undefined; // No back button on the first step
     }
-
     return "Back"; // Show back button for all other steps
   }, [step]);
 
-  let isNextDisabled = false; // Default to false
+  const isNextDisabled = useMemo(() => {
+    switch (step) {
+      case STEPS.CATEGORY:
+        return !category;
+      case STEPS.LOCATION:
+        return !location;
+      case STEPS.IMAGES:
+        return !imageSrc;
+      case STEPS.DESCRIPTION:
+        return !title || !description;
+      case STEPS.PRICE:
+        return !price;
+      default:
+        return false;
+    }
+  }, [step, category, location, imageSrc, title, description, price]);
 
   let bodyContent = (
     <div className="flex flex-col gap-8">
@@ -265,10 +285,6 @@ const ListModal = () => {
         </div>
       </div>
     );
-
-    // Disable "Next" button if no category is selected
-    isNextDisabled = !category;
-    actionLabel = isNextDisabled ? "Select a category to continue" : "Next";
   }
 
   if (step === STEPS.LOCATION) {
@@ -285,10 +301,6 @@ const ListModal = () => {
         <Map center={location?.latlng} />
       </div>
     );
-
-    // Disable "Next" button if no location is selected
-    isNextDisabled = !location;
-    actionLabel = isNextDisabled ? "Select a location to continue" : "Next";
   }
 
   if (step === STEPS.FEATURES) {

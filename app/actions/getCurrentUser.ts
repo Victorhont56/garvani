@@ -5,8 +5,13 @@ import { SafeUser } from "@/app/types";
 import { authOptions } from "@/app/libs/auth"; // ✅ Import authOptions
 
 export default async function getCurrentUser(): Promise<SafeUser | null> {
+  const session = await getServerSession(authOptions);
+  console.log("Session:", session);
+  
+  
   try {
     const session = await getServerSession(authOptions); // ✅ Use getServerSession()
+    
 
     if (!session?.user?.email) {
       console.log("Session not found or no email available");

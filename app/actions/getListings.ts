@@ -3,8 +3,11 @@ import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 
 export interface IListingsParams {
   userId?: string;
+  mode: string;
+  type: string;
   guestCount?: number;
-  roomCount?: number;
+  livingroomCount: number;
+  bedroomCount?: number;
   bathroomCount?: number;
   startDate?: string;
   endDate?: string;
@@ -16,7 +19,10 @@ export default async function getListings(params: IListingsParams) {
   try {
     const {
       userId,
-      roomCount,
+      mode,
+      type,
+      livingroomCount,
+      bedroomCount,
       guestCount,
       bathroomCount,
       locationValue,
@@ -33,12 +39,24 @@ export default async function getListings(params: IListingsParams) {
       conditions.push(where("userId", "==", userId));
     }
 
+    if (mode) {
+      conditions.push(where("mode", "==", mode));
+    }
+
+    if (type) {
+      conditions.push(where("type", "==", type));
+    }
+
+    if (livingroomCount) {
+      conditions.push(where("livingroomCount", "==", livingroomCount));
+    }
+
     if (category) {
       conditions.push(where("category", "==", category));
     }
 
-    if (roomCount) {
-      conditions.push(where("roomCount", ">=", roomCount));
+    if (bedroomCount) {
+      conditions.push(where("roomCount", ">=", bedroomCount));
     }
 
     if (guestCount) {

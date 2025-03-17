@@ -1,18 +1,14 @@
+// app/libs/auth.ts
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-
-import { auth, db } from "./firebase"; // ✅ Import from firebase.ts
+import { auth, db } from "./firebase";
 
 export const authOptions: AuthOptions = {
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
-    }),
+  
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
@@ -24,6 +20,7 @@ export const authOptions: AuthOptions = {
         password: { label: "password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("Credentials:", credentials);
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Invalid credentials");
         }
@@ -35,8 +32,10 @@ export const authOptions: AuthOptions = {
             credentials.email,
             credentials.password
           );
+          console.log("User Credential:", userCredential);
 
-          // Get user data from Firestore (if needed)
+          
+          // Get user data from Firestore
           const userDocRef = doc(db, "users", userCredential.user.uid);
           const userDoc = await getDoc(userDocRef);
 
